@@ -3,19 +3,16 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args){
-        exercise1();
+        exercise5();
     }
-    static void exercise1() {
+    static void exercise5() {
         Scanner scanner = new Scanner(System.in);
 
-        //ввод высоты
+        //ввод
         System.out.print("Введите высоту прямоугольника: ");
         int h = scanner.nextInt();
-
-        //ввод ширины
         System.out.print("Введите ширину прямоугольника: ");
         int w = scanner.nextInt();
-
         scanner.close();
 
         //цикл по высоте
