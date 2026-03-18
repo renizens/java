@@ -156,8 +156,8 @@ public class Task8 {
                 int value = array[i][j];
 
                 if (array[i][j + 1] == value &&
-                    array[i + 1][j] == value &&
-                    array[i + 1][j + 1] == value) {
+                        array[i + 1][j] == value &&
+                        array[i + 1][j + 1] == value) {
 
                     if (found) result.append(", ");
                     result.append("(R: ").append(i).append(", C: ").append(j).append(")");
@@ -169,22 +169,14 @@ public class Task8 {
         return found ? result.append(" }").toString() : "{ }";
     }
 
-    // Красивый вывод массива в консоль
+    // Вывод массива в консоль
     static void printArray(int[][] array) {
-        System.out.println("{");
-
         for (int i = 0; i < array.length; i++) {
-            System.out.print("  { ");
-
             for (int j = 0; j < array[i].length; j++) {
-                System.out.print(array[i][j]);
-                if (j < array[i].length - 1) System.out.print(", ");
+                System.out.print(array[i][j] + " ");
             }
-
-            System.out.println(" }" + (i < array.length - 1 ? "," : ""));
+            System.out.println();
         }
-
-        System.out.println("}");
     }
 
     // Сохранение результатов в файл
