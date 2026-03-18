@@ -1,0 +1,197 @@
+package com.example.labwork4fx;
+
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+
+import java.io.*;
+import java.util.*;
+
+public class Task8FX extends Application {
+
+    TextArea in = new TextArea();
+    TextArea out1 = new TextArea();
+    TextArea out2 = new TextArea();
+
+    public void start(Stage stage) {
+        stage.setTitle("Лабораторная работа 4");
+
+        Button open = new Button("Открыть");
+        Button t1 = new Button("Задание 1");
+        Button t2 = new Button("Задание 2");
+        Button save = new Button("Сохранить");
+
+        in.setEditable(false);
+        out1.setEditable(false);
+        out2.setEditable(false);
+
+        VBox root = new VBox(10, open, in, t1, out1, t2, out2, save);
+
+        open.setOnAction(e -> openFile(stage));
+        t1.setOnAction(e -> out1.setText(arrToStr(removeDup(parse(in.getText())))));
+        t2.setOnAction(e -> out2.setText(findSq(parse(in.getText()))));
+        save.setOnAction(e -> saveFile(stage));
+
+        stage.setScene(new Scene(root, 600, 500));
+        stage.show();
+    }
+
+    // открыть файл
+    void openFile(Stage stage) {
+        FileChooser fc = new FileChooser();
+        File f = fc.showOpenDialog(stage);
+
+        if (f != null) {
+            try {
+                in.setText(arrToStr(read(f.getPath())));
+            } catch (Exception e) {
+                in.setText("ошибка");
+            }
+        }
+    }
+
+    // сохранить
+    void saveFile(Stage stage) {
+        FileChooser fc = new FileChooser();
+        File f = fc.showSaveDialog(stage);
+
+        if (f != null) {
+            try {
+                PrintWriter pw = new PrintWriter(f);
+                pw.println("исходный:\n" + in.getText());
+                pw.println("\nзадание1:\n" + out1.getText());
+                pw.println("\nзадание2:\n" + out2.getText());
+                pw.close();
+            } catch (Exception e) {
+                out2.setText("ошибка");
+            }
+        }
+    }
+
+    // чтение файла
+    int[][] read(String name) throws Exception {
+        List<int[]> list = new ArrayList<>();
+        Scanner sc = new Scanner(new File(name));
+
+        while (sc.hasNextLine()) {
+            String line = sc.nextLine().trim();
+            if (line.isEmpty()) continue;
+
+            String[] s = line.split(" ");
+            int[] row = new int[s.length];
+
+            for (int i = 0; i < s.length; i++) {
+                row[i] = Integer.parseInt(s[i]);
+            }
+
+            list.add(row);
+        }
+
+        sc.close();
+        return list.toArray(new int[0][]);
+    }
+
+    // текст в массив
+    int[][] parse(String text) {
+        List<int[]> list = new ArrayList<>();
+
+        for (String line : text.split("\n")) {
+            line = line.replace("{", "").replace("}", "").replace(",", "").trim();
+            if (line.isEmpty()) continue;
+
+            String[] s = line.split("\\s+");
+            int[] row = new int[s.length];
+
+            for (int i = 0; i < s.length; i++) {
+                row[i] = Integer.parseInt(s[i]);
+            }
+
+            list.add(row);
+        }
+
+        return list.toArray(new int[0][]);
+    }
+
+    // удаление одинаковых столбцов
+    int[][] removeDup(int[][] a) {
+        int r = a.length;
+        int c = a[0].length;
+
+        boolean[] del = new boolean[c];
+
+        for (int j = 0; j < c; j++) {
+            for (int k = j + 1; k < c; k++) {
+                boolean same = true;
+
+                for (int i = 0; i < r; i++) {
+                    if (a[i][j] != a[i][k]) {
+                        same = false;
+                        break;
+                    }
+                }
+
+                if (same) del[k] = true;
+            }
+        }
+
+        int count = 0;
+        for (int j = 0; j < c; j++) {
+            if (!del[j]) count++;
+        }
+
+        int[][] res = new int[r][count];
+        int col = 0;
+
+        for (int j = 0; j < c; j++) {
+            if (!del[j]) {
+                for (int i = 0; i < r; i++) {
+                    res[i][col] = a[i][j];
+                }
+                col++;
+            }
+        }
+
+        return res;
+    }
+
+    // поиск квадратов
+    String findSq(int[][] a) {
+        String s = "";
+
+        for (int i = 0; i < a.length - 1; i++) {
+            for (int j = 0; j < a[i].length - 1; j++) {
+                int x = a[i][j];
+
+                if (a[i][j + 1] == x &&
+                        a[i + 1][j] == x &&
+                        a[i + 1][j + 1] == x) {
+
+                    s += "R=" + i + " C=" + j + "\n";
+                }
+            }
+        }
+
+        return s;
+    }
+
+    // массив в строку (просто)
+    String arrToStr(int[][] a) {
+        String s = "";
+
+        for (int[] row : a) {
+            for (int x : row) {
+                s += x + " ";
+            }
+            s += "\n";
+        }
+
+        return s;
+    }
+
+    public static void main(String[] args) {
+        launch();
+    }
+}
