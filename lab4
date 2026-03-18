@@ -1,0 +1,225 @@
+import java.io.*;
+import java.util.*;
+
+public class Task8 {
+
+    // Класс для хранения аргументов командной строки
+    static class InputArgs {
+        String inputFile;
+        String outputFile;
+
+        InputArgs(String inputFile, String outputFile) {
+            this.inputFile = inputFile;
+            this.outputFile = outputFile;
+        }
+    }
+
+    // Разбор аргументов командной строки
+    static InputArgs parseCmdArgs(String[] args) {
+        String input = null;
+        String output = null;
+
+        for (int i = 0; i < args.length; i++) {
+            String arg = args[i];
+
+            if (arg.equals("-i") && i + 1 < args.length) {
+                input = args[++i];
+            } else if (arg.equals("-o") && i + 1 < args.length) {
+                output = args[++i];
+            } else if (arg.startsWith("--input-file=")) {
+                input = arg.substring(13);
+            } else if (arg.startsWith("--output-file=")) {
+                output = arg.substring(14);
+            } else if (input == null) {
+                input = arg;
+            } else if (output == null) {
+                output = arg;
+            }
+        }
+
+        return new InputArgs(input, output);
+    }
+
+    public static void main(String[] args) {
+        InputArgs params = parseCmdArgs(args);
+
+        if (params.inputFile == null || params.outputFile == null) {
+            System.err.println("Ошибка: java Task8 [-i] input [-o] output");
+            System.exit(1);
+        }
+
+        try {
+            int[][] array = readArray(params.inputFile);
+
+            System.out.println("Исходный массив:");
+            printArray(array);
+
+            System.out.println("\nЗадание 1 (удаление дубликатов столбцов):");
+            int[][] noDuplicates = removeDuplicates(array);
+            printArray(noDuplicates);
+
+            System.out.println("\nЗадание 2 (поиск квадратов):");
+            String squares = findSquares(array);
+            System.out.println(squares);
+
+            saveResults(params.outputFile, array, noDuplicates, squares);
+            System.out.println("\nРезультаты сохранены в файл: " + params.outputFile);
+
+        } catch (Exception e) {
+            System.err.println("Ошибка: " + e.getMessage());
+            System.exit(1);
+        }
+    }
+
+    // Чтение двумерного массива из файла
+    static int[][] readArray(String fileName) throws IOException {
+        List<int[]> rows = new ArrayList<>();
+        Scanner scanner = new Scanner(new File(fileName));
+
+        while (scanner.hasNextLine()) {
+            String line = scanner.nextLine().trim();
+            if (line.isEmpty()) continue;
+
+            String[] numbers = line.split(" ");
+            int[] row = new int[numbers.length];
+
+            for (int i = 0; i < numbers.length; i++) {
+                row[i] = Integer.parseInt(numbers[i]);
+            }
+
+            rows.add(row);
+        }
+
+        scanner.close();
+        return rows.toArray(new int[0][]);
+    }
+
+    // Удаление одинаковых столбцов
+    static int[][] removeDuplicates(int[][] array) {
+        if (array.length == 0) return new int[0][0];
+
+        int rows = array.length;
+        int cols = array[0].length;
+
+        boolean[] toDelete = new boolean[cols];
+
+        for (int j = 0; j < cols; j++) {
+            if (toDelete[j]) continue;
+
+            for (int k = j + 1; k < cols; k++) {
+                if (toDelete[k]) continue;
+
+                boolean identical = true;
+
+                for (int i = 0; i < rows; i++) {
+                    if (array[i][j] != array[i][k]) {
+                        identical = false;
+                        break;
+                    }
+                }
+
+                if (identical) {
+                    toDelete[k] = true;
+                }
+            }
+        }
+
+        int newCols = 0;
+        for (boolean flag : toDelete) {
+            if (!flag) newCols++;
+        }
+
+        int[][] result = new int[rows][newCols];
+        int index = 0;
+
+        for (int j = 0; j < cols; j++) {
+            if (!toDelete[j]) {
+                for (int i = 0; i < rows; i++) {
+                    result[i][index] = array[i][j];
+                }
+                index++;
+            }
+        }
+
+        return result;
+    }
+
+    // Поиск квадратов 2x2 из одинаковых элементов
+    static String findSquares(int[][] array) {
+        if (array.length < 2) return "{ }";
+
+        StringBuilder result = new StringBuilder("{ ");
+        boolean found = false;
+
+        for (int i = 0; i < array.length - 1; i++) {
+            for (int j = 0; j < array[i].length - 1; j++) {
+                int value = array[i][j];
+
+                if (array[i][j + 1] == value &&
+                    array[i + 1][j] == value &&
+                    array[i + 1][j + 1] == value) {
+
+                    if (found) result.append(", ");
+                    result.append("(R: ").append(i).append(", C: ").append(j).append(")");
+                    found = true;
+                }
+            }
+        }
+
+        return found ? result.append(" }").toString() : "{ }";
+    }
+
+    // Красивый вывод массива в консоль
+    static void printArray(int[][] array) {
+        System.out.println("{");
+
+        for (int i = 0; i < array.length; i++) {
+            System.out.print("  { ");
+
+            for (int j = 0; j < array[i].length; j++) {
+                System.out.print(array[i][j]);
+                if (j < array[i].length - 1) System.out.print(", ");
+            }
+
+            System.out.println(" }" + (i < array.length - 1 ? "," : ""));
+        }
+
+        System.out.println("}");
+    }
+
+    // Сохранение результатов в файл
+    static void saveResults(String fileName, int[][] original, int[][] cleaned, String squares) throws IOException {
+        PrintWriter writer = new PrintWriter(fileName);
+
+        writer.println("ИСХОДНЫЙ:");
+        writer.println(arrayToString(original));
+
+        writer.println("\nЗАДАНИЕ 1:");
+        writer.println(arrayToString(cleaned));
+
+        writer.println("\nЗАДАНИЕ 2:");
+        writer.println(squares);
+
+        writer.close();
+    }
+
+    // Преобразование массива в строку
+    static String arrayToString(int[][] array) {
+        StringBuilder sb = new StringBuilder("{\n");
+
+        for (int i = 0; i < array.length; i++) {
+            sb.append("  { ");
+
+            for (int j = 0; j < array[i].length; j++) {
+                sb.append(array[i][j]);
+                if (j < array[i].length - 1) sb.append(", ");
+            }
+
+            sb.append(" }");
+            if (i < array.length - 1) sb.append(",\n");
+        }
+
+        sb.append("\n}");
+        return sb.toString();
+    }
+}
