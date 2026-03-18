@@ -1,0 +1,114 @@
+package com.example.demo;
+
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
+public class HelloApplication extends Application {
+
+    public void start(Stage stage) {
+        Label text = new Label("Найти сумму элементов между последними четным и нечетным");
+
+        TextField input = new TextField();
+        Button calc = new Button("Рассчитать");
+        Button test = new Button("Тесты");
+        TextArea output = new TextArea();
+
+        output.setEditable(false);
+
+        calc.setOnAction(e -> {
+            try {
+                String[] parts = input.getText().split(" ");
+                int[] arr = new int[parts.length];
+
+                for (int i = 0; i < parts.length; i++) {
+                    arr[i] = Integer.parseInt(parts[i]);
+                }
+
+                int res = solution(arr);
+                output.setText("Сумма: " + res);
+
+            } catch (Exception ex) {
+                output.setText("Ошибка");
+            }
+        });
+
+        test.setOnAction(e -> {
+            int[][] tests = {
+                    {1,2,3,7,9},
+                    {2,4,6},
+                    {1,3,5},
+                    {5,4,3,2,1},
+                    {0,1,2,3},
+                    {7,9,2,4},
+                    {-2,-4,-1,-3},
+                    {10,11,12,13},
+                    {8,6,4,2},
+                    {1,2}
+            };
+
+            String s = "";
+
+            for (int i = 0; i < tests.length; i++) {
+                s += "Тест " + (i+1) + ": ";
+                s += arrayToString(tests[i]);
+                s += " -> " + solution(tests[i]) + "\n";
+            }
+
+            output.setText(s);
+        });
+
+        VBox root = new VBox(10, text, input, calc, test, output);
+        root.setStyle("-fx-padding: 10;");
+
+        stage.setScene(new Scene(root, 400, 300));
+        stage.setTitle("Лабораторная работа 3");
+        stage.show();
+    }
+
+    static int lastEven(int[] arr) {
+        for (int i = arr.length - 1; i >= 0; i--) {
+            if (arr[i] % 2 == 0) return i;
+        }
+        return -1;
+    }
+
+    static int lastOdd(int[] arr) {
+        for (int i = arr.length - 1; i >= 0; i--) {
+            if (arr[i] % 2 != 0) return i;
+        }
+        return -1;
+    }
+
+    static int solution(int[] arr) {
+        int a = lastEven(arr);
+        int b = lastOdd(arr);
+
+        if (a == -1 || b == -1) return 0;
+
+        int l = Math.min(a, b);
+        int r = Math.max(a, b);
+
+        int sum = 0;
+        for (int i = l + 1; i < r; i++) {
+            sum += arr[i];
+        }
+
+        return sum;
+    }
+
+    static String arrayToString(int[] arr) {
+        String s = "[";
+        for (int i = 0; i < arr.length; i++) {
+            s += arr[i];
+            if (i < arr.length - 1) s += ", ";
+        }
+        return s + "]";
+    }
+
+    public static void main(String[] args) {
+        launch();
+    }
+}
