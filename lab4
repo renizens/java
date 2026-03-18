@@ -44,7 +44,7 @@ public class Task8 {
         InputArgs params = parseCmdArgs(args);
 
         if (params.inputFile == null || params.outputFile == null) {
-            System.err.println("Ошибка: java Task8 [-i] input [-o] output");
+            System.err.println("Ошибка");
             System.exit(1);
         }
 
@@ -96,77 +96,71 @@ public class Task8 {
 
     // Удаление одинаковых столбцов
     static int[][] removeDuplicates(int[][] array) {
-        if (array.length == 0) return new int[0][0];
-
         int rows = array.length;
         int cols = array[0].length;
 
-        boolean[] toDelete = new boolean[cols];
+        boolean[] del = new boolean[cols];
 
+        // ищем одинаковые столбцы
         for (int j = 0; j < cols; j++) {
-            if (toDelete[j]) continue;
-
             for (int k = j + 1; k < cols; k++) {
-                if (toDelete[k]) continue;
-
-                boolean identical = true;
+                boolean same = true;
 
                 for (int i = 0; i < rows; i++) {
                     if (array[i][j] != array[i][k]) {
-                        identical = false;
+                        same = false;
                         break;
                     }
                 }
 
-                if (identical) {
-                    toDelete[k] = true;
-                }
+                if (same) del[k] = true;
             }
         }
 
-        int newCols = 0;
-        for (boolean flag : toDelete) {
-            if (!flag) newCols++;
+        // считаем сколько осталось столбцов
+        int count = 0;
+        for (int j = 0; j < cols; j++) {
+            if (!del[j]) count++;
         }
 
-        int[][] result = new int[rows][newCols];
-        int index = 0;
+        // создаём новый массив
+        int[][] res = new int[rows][count];
+        int col = 0;
 
         for (int j = 0; j < cols; j++) {
-            if (!toDelete[j]) {
+            if (!del[j]) {
                 for (int i = 0; i < rows; i++) {
-                    result[i][index] = array[i][j];
+                    res[i][col] = array[i][j];
                 }
-                index++;
+                col++;
             }
         }
 
-        return result;
+        return res;
     }
 
     // Поиск квадратов 2x2 из одинаковых элементов
     static String findSquares(int[][] array) {
-        if (array.length < 2) return "{ }";
+        if (array.length < 2) return "";
 
-        StringBuilder result = new StringBuilder("{ ");
-        boolean found = false;
+        StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < array.length - 1; i++) {
             for (int j = 0; j < array[i].length - 1; j++) {
-                int value = array[i][j];
+                int x = array[i][j];
 
-                if (array[i][j + 1] == value &&
-                        array[i + 1][j] == value &&
-                        array[i + 1][j + 1] == value) {
+                if (array[i][j + 1] == x &&
+                        array[i + 1][j] == x &&
+                        array[i + 1][j + 1] == x) {
 
-                    if (found) result.append(", ");
-                    result.append("(R: ").append(i).append(", C: ").append(j).append(")");
-                    found = true;
+                    sb.append("R=").append(i)
+                            .append(" C=").append(j)
+                            .append("\n");
                 }
             }
         }
 
-        return found ? result.append(" }").toString() : "{ }";
+        return sb.toString();
     }
 
     // Вывод массива в консоль
@@ -197,21 +191,15 @@ public class Task8 {
 
     // Преобразование массива в строку
     static String arrayToString(int[][] array) {
-        StringBuilder sb = new StringBuilder("{\n");
+        StringBuilder sb = new StringBuilder();
 
-        for (int i = 0; i < array.length; i++) {
-            sb.append("  { ");
-
-            for (int j = 0; j < array[i].length; j++) {
-                sb.append(array[i][j]);
-                if (j < array[i].length - 1) sb.append(", ");
+        for (int[] row : array) {
+            for (int x : row) {
+                sb.append(x).append(" ");
             }
-
-            sb.append(" }");
-            if (i < array.length - 1) sb.append(",\n");
+            sb.append("\n");
         }
 
-        sb.append("\n}");
         return sb.toString();
     }
 }
