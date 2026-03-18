@@ -1,0 +1,85 @@
+package com.example.demo2;
+
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
+import java.util.Arrays;
+
+public class ArraySumApp extends Application {
+
+    TextField input = new TextField();
+    TextArea output = new TextArea();
+
+    public void start(Stage stage) {
+        Label text = new Label("Введите числа через пробел:");
+
+        Button calc = new Button("Вычислить");
+        Button test = new Button("Тесты");
+        Button clear = new Button("Очистить");
+
+        output.setEditable(false);
+
+        VBox root = new VBox(10, text, input, calc, test, clear, output);
+        root.setStyle("-fx-padding: 10;");
+
+        calc.setOnAction(e -> calculate());
+        test.setOnAction(e -> runTests());
+        clear.setOnAction(e -> {
+            input.clear();
+            output.clear();
+        });
+
+        stage.setScene(new Scene(root, 500, 400));
+        stage.setTitle("Задание 3");
+        stage.show();
+    }
+
+    int[] readArray() {
+        try {
+            String[] parts = input.getText().trim().split(" ");
+            int[] arr = new int[parts.length];
+
+            for (int i = 0; i < parts.length; i++) {
+                arr[i] = Integer.parseInt(parts[i]);
+            }
+            return arr;
+        } catch (Exception e) {
+            output.setText("Ошибка ввода");
+            return null;
+        }
+    }
+
+    void calculate() {
+        int[] arr = readArray();
+        if (arr == null) return;
+
+        int result = Solution.countElements(arr);
+
+        output.appendText("Массив: " + Arrays.toString(arr) + "\n");
+        output.appendText("Результат: " + result + "\n\n");
+    }
+
+    void runTests() {
+        int[][] tests = {
+                {1,2,3},
+                {0,0,0},
+                {1,-1,0},
+                {2,4,6},
+                {5}
+        };
+
+        for (int i = 0; i < tests.length; i++) {
+            int res = Solution.countElements(tests[i]);
+
+            output.appendText("Тест " + (i+1) + ": " + Arrays.toString(tests[i]) + "\n");
+            output.appendText("Результат: " + res + "\n\n");
+        }
+    }
+
+    public static void main(String[] args) {
+        launch();
+    }
+}
